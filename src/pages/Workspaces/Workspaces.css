@@ -1,0 +1,96 @@
+.card {
+  position: relative;
+  width: 100%;
+  height: 200px;
+  background: no-repeat center center;
+  background-size: cover;
+  color: white;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  padding: 10px;
+  border: none;
+}
+
+.card .board-link {
+  width: 100%;
+  height: 100%;
+}
+
+.card-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+
+.card .dropdown {
+  position: absolute;
+  right: 12px;
+  top: 8px;
+  z-index: 10;
+}
+
+.board-container {
+  min-width: 200px;
+}
+
+.board-name {
+  margin: 0;
+  font-size: 1.2rem;
+  z-index: 1;
+}
+
+.edit-button {
+  z-index: 1;
+  margin-left: 120px;
+  background: none !important;
+  border: none !important;
+}
+.delete-button {
+  background: none !important;
+  border: none !important;
+}
+
+.no-caret::after {
+  display: none !important;
+}
+.no-caret {
+  font-size: 24px;
+  font-weight: bold;
+  text-align: center;
+  line-height: 1;
+}
+
+.custom-dropdown-toggle::after {
+  display: none;
+}
+
+.custom-dropdown-toggle {
+  background-color: transparent;
+  border: none;
+  padding: 0;
+  font-size: 24px;
+  line-height: 0.5;
+  color: #333;
+}
+
+.vertical-dots {
+  display: flex;
+  flex-direction: column;
+  text-align: center;
+  font-weight: bold;
+}
+
+.views-wrapper {
+  display: flex;
+}
+
+@media (max-width: 500px) {
+  .views .wrapper .card {
+    width: 100%;
+  }
+  .views .wrapper .board-link {
+    width: 45%;
+  }
+}

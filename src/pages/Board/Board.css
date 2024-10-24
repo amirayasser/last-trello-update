@@ -1,0 +1,158 @@
+.boards > .wrapper {
+  padding: 1% 0 0 6%;
+  min-height: 100vh;
+  background-size: cover;
+  background-position: center;
+  padding-top: 85px;
+}
+
+.boards > .wrapper .wrapper-lists {
+  align-items: start;
+  display: flex;
+  gap: 18px;
+  min-height: 100vh;
+  overflow-x: scroll;
+}
+
+.boards .addList {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  border-radius: 18px;
+  width: 250px;
+  min-width: 250px;
+  background-color: #46484d8a;
+}
+
+.boards .addList.addListCard {
+  width: 97%;
+
+  min-width: auto;
+}
+.boards .addList .dropdown-toggle::after {
+  display: none;
+}
+
+.boards .addList:hover {
+  background-color: #292a2b;
+}
+.boards .addList.addListCard:hover {
+  background-color: #898e9296;
+}
+
+.boards .addList img {
+  width: 25px;
+  width: 16px;
+}
+
+.boards .addList > button {
+  text-align: left;
+  flex: 1;
+  border: none;
+  background: transparent;
+  color: white;
+}
+.boards .addList.addListCard > button {
+  color: #515255;
+}
+
+.boards .addListForm {
+  position: absolute;
+  top: 0;
+  left: 0;
+  border-radius: 18px;
+  width: 250px;
+  padding: 8px 12px;
+  background-color: white;
+  z-index: 10;
+}
+.boards .addListForm.addListCard {
+  width: 100%;
+  position: absolute;
+}
+
+.boards .addListForm input {
+  width: 100%;
+  border-radius: 5px;
+  margin-bottom: 12px;
+  border: 2px solid #0055cc;
+  padding: 2px 6px;
+}
+
+.boards .addListForm button {
+  padding: 5px 12px;
+}
+
+.boards .addListForm form > div {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.boards .list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  border-radius: 18px;
+  padding: 8px 0;
+  padding-left: 12px;
+  width: 250px;
+  min-width: 250px;
+  background-color: #fff;
+  margin-bottom: 45px;
+}
+
+.boards .list .list-header {
+  padding: 8px 12px;
+}
+.boards .list h3 {
+  font-size: 16px;
+  margin-left: 8px;
+  font-weight: 600;
+  line-height: 20px;
+}
+
+.boards .list > .wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: calc(100vh - 230px);
+  overflow-y: scroll;
+}
+
+.list .wrapper .item .cover-image {
+  height: 25px;
+}
+
+.boards .list > .wrapper .item {
+  overflow: hidden;
+  width: 100%;
+  border-radius: 12px;
+  background-color: #fff;
+  box-shadow: 0px 2px 5px 0px rgba(0, 0, 0, 0.45);
+  -webkit-box-shadow: 0px 2px 5px 0px rgba(0, 0, 0, 0.45);
+  -moz-box-shadow: 0px 2px 5px 0px rgba(0, 0, 0, 0.45);
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: all 0.3s ease-in;
+}
+.boards .list > .wrapper .item:active {
+  opacity: 0.7;
+  border: 1px solid rgb(49, 134, 214) !important;
+}
+
+.boards .list > .wrapper .item .title {
+  padding: 8px 12px;
+}
+
+.boards .list > .wrapper .item:hover {
+  border: 1px solid rgba(58, 54, 54, 0.466);
+}
+
+.boards .board-options {
+  display: flex;
+  color: white;
+  font-size: 22px;
+  margin-bottom: 16px;
+}

@@ -1,0 +1,53 @@
+.login {
+  background-color: #fafbfc;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+}
+
+.login .login-card {
+  width: 40%;
+  background-color: white;
+  padding: 25px;
+}
+
+.login .login-card > img {
+  width: 180px;
+  display: block;
+  margin: auto;
+}
+
+.login .login-card form {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.login .login-card h2 {
+  font-size: 16px;
+  color: rgb(133, 129, 129);
+}
+
+.login .login-card form > div,
+.login .login-card form > button {
+  width: 100%;
+}
+
+.login .login-card form > a {
+  margin-top: 8px;
+}
+
+.login .login-card form > a:hover {
+  text-decoration: underline !important;
+}
+
+@media (max-width: 1080px) {
+  .login {
+    width: 100%;
+  }
+  .login .login-card {
+    width: 100%;
+  }
+}

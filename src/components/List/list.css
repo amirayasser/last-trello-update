@@ -1,0 +1,24 @@
+.no-caret::after {
+  display: none !important;
+}
+.no-caret {
+  font-size: 24px;
+  font-weight: bold;
+  text-align: center;
+  line-height: 1;
+}
+.custom-dropdown-toggle {
+  background-color: transparent;
+  border: none;
+  padding: 0;
+  font-size: 24px;
+  line-height: 0.5;
+  color: #333;
+}
+
+.vertical-dots {
+  display: flex;
+  flex-direction: column;
+  text-align: center;
+  font-weight: bold;
+}

@@ -1,0 +1,19 @@
+.drop-area {
+  width: 100%;
+  height: 0px;
+  border-radius: 8px;
+  background-color: rgba(65, 60, 60, 0.774);
+  padding: 18px;
+  color: white;
+  opacity: 0;
+  transition: all 0.3s ease-in;
+  margin-top: -30px;
+  position: relative;
+}
+
+.drop-area.show {
+  opacity: 1;
+  height: 60px;
+  margin-top: 0px;
+  z-index: 1;
+}

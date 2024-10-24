@@ -1,0 +1,131 @@
+.offcanvas {
+  width: 280px !important;
+  top: 59px !important;
+  z-index: 100 !important;
+}
+
+.offcanvas-body {
+  overflow-x: hidden;
+}
+
+.side-bar {
+  width: 15px;
+  height: 100vh;
+  position: fixed;
+  top: 59px;
+  background-color: #335164;
+  z-index: 10000;
+}
+button.sideNav-link {
+  position: fixed;
+  left: 4px;
+  top: 92px;
+  right: 21px;
+  height: 25px;
+  width: 25px;
+  z-index: 100;
+  background-color: #335164 !important;
+  border-radius: 50%;
+  background-color: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.fade.offcanvas-backdrop {
+  display: none;
+}
+
+.offcanvas-body .board-item .board-item {
+  padding: 0 8px;
+  color: white;
+}
+
+button.sideNav-link:hover {
+  background-color: #335164;
+}
+
+button.sideNav-link > img {
+  width: 20px;
+  height: 20px;
+}
+
+.offcanvas {
+  width: 280px !important;
+}
+
+.offcanvas-start {
+  z-index: 1000;
+  background-color: #335164 !important;
+}
+
+.offcanvas-header {
+  border-bottom: 1px solid rgb(204, 206, 204);
+}
+
+.offcanvas-title {
+  display: flex;
+  gap: 15px;
+  color: white;
+  font-size: 16px !important;
+}
+
+.offcanvas-body {
+  padding: 15px 8px !important ;
+}
+
+.offcanvas-title > img,
+.offcanvas-body img {
+  width: 35px;
+  height: 25px;
+  border-radius: 3px;
+}
+
+.offcanvas-body h2 {
+  color: white;
+  font-size: 14px;
+  margin: 12px 0;
+  margin-bottom: 15px !important;
+  padding: 0 12px;
+}
+
+.offcanvas-body .board-item {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  color: white;
+  margin: 8px;
+  margin-right: 0;
+  width: 97%;
+  position: relative;
+}
+.offcanvas-body .users-list {
+  padding: 12px 4px;
+  background-color: #3e99d188;
+  border-radius: 12px;
+}
+
+.offcanvas-body .board-item::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: transparent;
+  transition: all 0.3s ease-in-out;
+}
+
+.offcanvas-body .board-item:hover:after {
+  background-color: rgba(175, 179, 182, 0.329);
+}
+
+@media (max-width: 850px) {
+  .offcanvas {
+    width: 200px !important;
+  }
+}
+@media (max-width: 1080px) {
+  button.sideNav-link {
+    top: 150px;
+  }
+}
