@@ -1,7 +1,61 @@
+.home {
+  background: #1d2125;
+}
+
+.home .views {
+  padding-bottom: 80px !important;
+  min-height: 100vh;
+  overflow-y: scroll;
+} 
+
+.views h3 {
+  color: hsl(211, 18%, 68%);
+  font-size: 18px;
+  margin: 20px 0;
+  
+}
+
+.workSpacesContainer{
+  padding: 0 0 20px;
+}
+
+.workSpacesContainer .workspace-bar {
+  display: flex;
+  /* flex-wrap: wrap; */
+  margin-left: 10px;
+  align-items: center;
+}
+
+
+.workSpacesContainer .workspace-bar .ws-option {
+  background: #a1bdd914 !important;
+  border: none;
+  border-radius: 3px;
+  color:#b6c2cf;
+  margin-bottom: 8px;
+  margin-left: 8px;
+  padding: 6px 12px 6px 6px ;
+    max-width: 130px;
+    font-size: 14px;
+}
+
+.ws-option+.dropdown-menu.membersMenu {
+  background-color: #282e33 !important;
+  
+}
+.ws-option+.dropdown-menu.membersMenu .dropdown-item{
+      color: #b6c2cf !important;
+}
+
+.ws-option+.dropdown-menu.membersMenu > .custom-dropdown-item:hover {
+  background-color: #a1bdd914 !important;
+  color: #b6c2cf !important;
+}
+
 .card {
   position: relative;
-  width: 100%;
-  height: 200px;
+  width: 100% !important;
+  height: 100% !important;
   background: no-repeat center center;
   background-size: cover;
   color: white;
@@ -33,6 +87,9 @@
 
 .board-container {
   min-width: 200px;
+  width: 20%;
+  height: 150px;
+  margin: 0 2% 2% 0;
 }
 
 .board-name {
@@ -41,16 +98,7 @@
   z-index: 1;
 }
 
-.edit-button {
-  z-index: 1;
-  margin-left: 120px;
-  background: none !important;
-  border: none !important;
-}
-.delete-button {
-  background: none !important;
-  border: none !important;
-}
+
 
 .no-caret::after {
   display: none !important;
@@ -75,15 +123,16 @@
   color: #333;
 }
 
-.vertical-dots {
-  display: flex;
-  flex-direction: column;
-  text-align: center;
-  font-weight: bold;
+
+.views-wrapper {
+width: 100% !important;   
 }
 
 .views-wrapper {
   display: flex;
+  justify-content: start !important;
+  flex-wrap: wrap;
+  gap: 0 !important;
 }
 
 @media (max-width: 500px) {
@@ -93,4 +142,10 @@
   .views .wrapper .board-link {
     width: 45%;
   }
+}
+
+
+.workSpacesContainer .workspace-item {
+    border-top: rgb(182, 194, 207,0.5) solid 1px;
+    padding-top: 30px;
 }

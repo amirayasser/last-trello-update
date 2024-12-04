@@ -1,3 +1,23 @@
 .react-responsive-modal-closeButton {
   top: 3px !important;
 }
+
+.card-text{
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  color: #b6c2cf;
+  padding: 8px 12px 4px;
+}
+
+.card-text p {
+  color: #b6c2cf;
+  font-size: 14px;
+}
+
+.item{
+/* padding: 8px 12px 4px; */
+background: #22272b !important;
+border-radius: 8px  !important;
+}

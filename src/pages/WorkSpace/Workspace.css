@@ -1,3 +1,8 @@
+.workspacePage{
+  background-color: #1d2125 !important;
+  min-height: 100vh !important;
+}
+
 .workspace .header {
   padding: 25px 0;
   display: flex;
@@ -5,6 +10,10 @@
   justify-content: space-around;
   align-items: center;
   border-bottom: 1px solid rgb(184, 182, 182);
+}
+
+.workspace .header  h2{
+      color: #b6c2cf;
 }
 
 .invite-link {
@@ -17,19 +26,35 @@
   width: 100%;
 }
 .workspace .body h2 {
-  margin-left: 12%;
+  margin-left: 100px;
   margin-top: 16px;
   margin-bottom: 28px;
+  color: #b6c2cf;
 }
 
 .workspace .workspace-item {
   margin-top: 25px;
 }
 .workspace .workspace-item .board-link {
-  min-width: 200px;
+width: 23.5%;
+  height: 140px;
+padding: 8px;
 }
+
+.workspace .workspace-item .board-link .card{
+padding: 0 !important;
+border: none;
+border-radius: 8px !important;
+overflow: hidden;
+width: 100%;
+}
+
 .workspace .workspace-item .wrapper {
   flex-wrap: wrap;
+  display: flex;
+  justify-content: start;
+  margin-left: 100px;
+  gap: 10px;
 }
 
 .workspace .filters {

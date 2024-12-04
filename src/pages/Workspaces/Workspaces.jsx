@@ -2,7 +2,7 @@ import "./Workspaces.css";
 import { useState, useEffect } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import Navbar from "../../components/navbar/Navbar";
-import { Link } from "react-router-dom";
+import { Link, NavLink } from "react-router-dom";
 import SideBar from "../../components/sideBar/SideBar";
 import Cookies from "js-cookie";
 import Spinner from "react-bootstrap/Spinner";
@@ -10,9 +10,13 @@ import api from "../../apiAuth/auth";
 import { Modal, Button, Form } from "react-bootstrap";
 import "@fortawesome/fontawesome-free/css/all.min.css";
 import { Dropdown } from "react-bootstrap";
+import PopupMsg from "../../components/popupmsg/PopupMsg";
+
+import bgimg from '../../assets/pexels-anastasia-shuraeva-7278606.jpg'
+import Notifications from "../../components/push notifications/PushNotifications";
 
 function Workspace() {
-  const [show, setShow] = useState(true);
+  const [show, setShow] = useState(false);
   const [loading, setLoading] = useState(true);
   const [workSpaces, setworkSpaces] = useState([]);
   const [editingBoardId, setEditingBoardId] = useState(null);
@@ -22,6 +26,14 @@ function Workspace() {
   const [editingWorkspaceId, setEditingWorkspaceId] = useState(null);
   const [editedWorkspaceName, setEditedWorkspaceName] = useState("");
   const [showWorkspaceModal, setShowWorkspaceModal] = useState(false);
+
+  const [wsMembers, setWsMembers] = useState({}); // تخزين الأعضاء بناءً على Workspace ID
+  const [loadingWorkspaceId, setLoadingWorkspaceId] = useState(null); // ID الخاص بالـ Workspace الجاري تحميله
+
+  const [openPopUp , setOpenPopUp] = useState(false); 
+  const [allUsers, setAllUsers] = useState([]);
+
+
 
   const cookies = Cookies.get("token");
 
@@ -33,6 +45,7 @@ function Workspace() {
         headers: { Authorization: `Bearer ${cookies}` },
       });
       setworkSpaces(data.result);
+      console.log('workspaces : ' + JSON.stringify(data.result));
     } catch (err) {
       console.log(err);
     } finally {
@@ -53,6 +66,7 @@ function Workspace() {
 
   const handleSaveClick = async (workspace_id, board_id) => {
     try {
+      // تحديث اسم اللوحة
       const nameUpdateResponse = await api({
         url: `/boards/update/${board_id}`,
         method: "POST",
@@ -74,6 +88,7 @@ function Workspace() {
 
         let updatedPhotoUrl = null;
 
+        // تحديث الصورة إذا كانت موجودة
         if (editedBoardPhoto && editedBoardPhoto instanceof File) {
           const photoFormData = new FormData();
           photoFormData.append("photo", editedBoardPhoto);
@@ -99,6 +114,7 @@ function Workspace() {
           }
         }
 
+        // تحديث الـ workspaces في الحالة
         setworkSpaces((prevWorkspaces) =>
           prevWorkspaces.map((workspace) =>
             workspace.id === workspace_id
@@ -119,9 +135,10 @@ function Workspace() {
           )
         );
 
+        // إعادة تعيين الحقول
         setEditingBoardId(null);
         setEditedBoardName("");
-        setEditedBoardPhoto("");
+        setEditedBoardPhoto(null); // تأكد من إعادة تعيين الصورة إذا كانت فارغة
         setShowModal(false);
       } else {
         console.log(
@@ -130,10 +147,13 @@ function Workspace() {
         );
       }
     } catch (error) {
-      console.log("Error updating board:", error);
+      console.error("Error updating board:", error);
       alert("Failed to update board. Please try again.");
     }
   };
+
+
+  
   const handleCancelEdit = () => {
     setEditingBoardId(null);
     setEditedBoardName("");
@@ -220,6 +240,47 @@ function Workspace() {
     }
   };
 
+  const getWorkspaceMembers = async (workspaceId) => {
+    // إذا كانت البيانات موجودة بالفعل، لا تقم بجلبها مجددًا
+    if (wsMembers[workspaceId])
+      return console.log("ws members already exist", wsMembers[workspaceId]);
+
+    setLoadingWorkspaceId(workspaceId); // تعيين ID الجاري تحميله
+    try {
+      const response = await api({
+        url: `/workspaces/${workspaceId}/users`,
+        method: "GET",
+        headers: { Authorization: `Bearer ${cookies}` },
+      });
+
+      const members = Array.isArray(response.data.result)
+        ? response.data.result
+        : [];
+
+      // تحديث الأعضاء مع ربطهم بـ workspaceId
+      setWsMembers((prev) => ({
+        ...prev,
+        [workspaceId]: members,
+      }));
+      console.log("Workspace members for ID", workspaceId, members);
+      // }, 100);
+      // تحديث الأعضاء مع ربطهم بـ workspaceId
+    } catch (error) {
+      console.error("Error getting workspace members:", error);
+      // حفظ ID مع بيانات فارغة في حال الخطأ
+      setWsMembers((prev) => ({
+        ...prev,
+        [workspaceId]: [],
+      }));
+    } finally {
+      setLoadingWorkspaceId(null); // إنهاء التحميل
+    }
+  };
+
+  useEffect(() => {
+    fetchWorkspaces();
+  }, []);
+
   useEffect(() => {
     if (!show) {
       document.querySelector(".views")?.classList.add("large");
@@ -244,105 +305,166 @@ function Workspace() {
         workSpaces={workSpaces}
         setShow={setShow}
         setworkSpaces={setworkSpaces}
+        allUsers={allUsers}
+        setAllUsers={setAllUsers}
       />
+
       <SideBar show={show} setShow={setShow} />
-      <div className="views">
-        {workSpaces.map((workspace) => (
-          <div className="workspace-item" key={workspace.id}>
-            <div className="d-flex justify-content-between mb-5">
-              <div>
-                <h2>{workspace.name}</h2>
-              </div>
-              <div>
-                <Dropdown>
-                  <Dropdown.Toggle
-                    as="button"
-                    className="custom-dropdown-toggle p-0 text-dark no-caret"
+      <div
+        className="views"
+        style={{
+          minHeight: "100vh",
+          width: show ? "calc(100% - 280px)" : "100%",
+          marginLeft: show ? "280px" : "0",
+        }}
+      >
+        <h3>YOUR WORKSPACES</h3>
+        <div className="workSpacesContainer">
+          {workSpaces.map((workspace) => (
+            <div className="workspace-item" key={workspace.id}>
+              {" "}
+              {/* single workspace */}
+              <div className="d-flex justify-content-between mb-5">
+                <div>
+                  <h3>{workspace.name}</h3>
+                </div>
+                <div className="workspace-bar">
+                  <NavLink
+                    to={`/workspace/${workspace.id}`}
+                    className="ws-option"
                   >
-                    <span className="vertical-dots">⋮</span>
-                  </Dropdown.Toggle>
-                  <Dropdown.Menu>
-                    <Dropdown.Item
-                      onClick={() =>
-                        handleEditWorkspaceClick(workspace.id, workspace.name)
-                      }
-                    >
-                      <i className="fa-regular fa-pen-to-square me-2"></i> Edit
-                    </Dropdown.Item>
-                    <Dropdown.Item
-                      onClick={() => handleDeleteWorkspaceClick(workspace.id)}
-                      className="text-danger"
-                    >
-                      <i className="fa-regular fa-trash-can me-2"></i> Delete
-                    </Dropdown.Item>
-                  </Dropdown.Menu>
-                </Dropdown>
-              </div>
-            </div>
-            <div className="wrapper views-wrapper">
-              {workspace.boards_of_the_workspace.map((board) => (
-                <div className="board-container" key={board.id}>
-                  <div
-                    className="card"
-                    style={{
-                      backgroundImage: board.photo
-                        ? `url(https://back.alyoumsa.com/public/storage/${board.photo})`
-                        : "url(/photo-1675981004510-4ec798f42006.jpg)",
+                    Boards
+                  </NavLink>
+
+                  <Dropdown
+                    key={workspace.id}
+                    onClick={() => {
+                      getWorkspaceMembers(workspace.id);
+                      console.log(workspace.id);
                     }}
                   >
-                    <Link
-                      className="board-link"
-                      to={`board/${workspace.id}/${board.id}`}
+                    <Dropdown.Toggle
+                      id={`dropdown-${workspace.id}`}
+                      className="ws-option"
                     >
-                      <div className="card-content">
-                        <p className="board-name">{board.name}</p>
-                      </div>
-                    </Link>
-                    <Dropdown>
-                      <Dropdown.Toggle
-                        as="button"
-                        drop="down"
-                        className="custom-dropdown-toggle p-0 no-caret"
-                      >
-                        <span
-                          className="vertical-dots"
-                          style={{ color: "white" }}
-                        >
-                          ⋮
-                        </span>
-                      </Dropdown.Toggle>
-                      <Dropdown.Menu>
-                        <Dropdown.Item
-                          onClick={() =>
-                            handleEditClick(board.id, board.name, board.photo)
-                          }
-                        >
-                          <i className="fa-regular fa-pen-to-square me-2"></i>{" "}
-                          Edit
-                        </Dropdown.Item>
-                        <Dropdown.Item
-                          onClick={() =>
-                            handleDeleteClick(workspace.id, board.id)
-                          }
-                          className="text-danger"
-                        >
-                          <i className="fa-regular fa-trash-can me-2"></i>{" "}
-                          Delete
-                        </Dropdown.Item>
-                      </Dropdown.Menu>
-                    </Dropdown>
-                  </div>
+                      Members
+                    </Dropdown.Toggle>
+
+                    <Dropdown.Menu className="membersMenu">
+                      {loadingWorkspaceId === workspace.id ? (
+                        <Dropdown.Item>Loading members...</Dropdown.Item> // إذا كانت البيانات لا تزال قيد التحميل
+                      ) : wsMembers[workspace.id] &&
+                        wsMembers[workspace.id]?.length > 0 ? (
+                        // إذا كان هناك أعضاء
+                        wsMembers[workspace.id].map((member) => (
+                          <Dropdown.Item
+                            key={member.user_id}
+                            className="custom-dropdown-item"
+                          >
+                            {member.user_name}
+                          </Dropdown.Item>
+                        ))
+                      ) : (
+                        // إذا لم يكن هناك أعضاء
+                        <Dropdown.Item>No members found</Dropdown.Item>
+                      )}
+                    </Dropdown.Menu>
+                  </Dropdown>
+
+                  <button
+                    className="ws-option"
+                    onClick={() =>
+                      handleEditWorkspaceClick(workspace.id, workspace.name)
+                    }
+                  >
+                    Edit
+                  </button>
+                  <button
+                    className="ws-option"
+                    onClick={() => handleDeleteWorkspaceClick(workspace.id)}
+                  >
+                    Delete
+                  </button>
                 </div>
-              ))}
+              </div>
+              <div className="wrapper views-wrapper">
+                {workspace.boards_of_the_workspace.map((board) => {
+                  console.log("ws: ", workspace);
+                  return (
+                    <div className="board-container" key={board.id}>
+                      <div
+                        className="card"
+                        style={{
+                          backgroundImage: board.photo
+                            ? `url(https://back.alyoumsa.com/storage/app/public/boards/${board.photo})`
+                            : `url(${bgimg})`,
+                        }}
+                      >
+                        <Link
+                          className="board-link"
+                          to={`board/${workspace.id}/${board.id}`}
+                        >
+                          <div className="card-content">
+                            <p className="board-name">{board.name}</p>
+                          </div>
+                        </Link>
+                        <Dropdown>
+                          <Dropdown.Toggle
+                            as="button"
+                            drop="down"
+                            className="custom-dropdown-toggle p-0 no-caret"
+                          >
+                            <span
+                              className="vertical-dots"
+                              style={{ color: "white" }}
+                            >
+                              ⋮
+                            </span>
+                          </Dropdown.Toggle>
+                          <Dropdown.Menu>
+                            <Dropdown.Item
+                              onClick={() =>
+                                handleEditClick(
+                                  board.id,
+                                  board.name,
+                                  board.photo
+                                )
+                              }
+                            >
+                              <i className="fa-regular fa-pen-to-square me-2"></i>{" "}
+                              Edit
+                            </Dropdown.Item>
+                            <Dropdown.Item
+                              onClick={() =>
+                                handleDeleteClick(workspace.id, board.id)
+                              }
+                              className="text-danger"
+                            >
+                              <i className="fa-regular fa-trash-can me-2"></i>{" "}
+                              Delete
+                            </Dropdown.Item>
+                          </Dropdown.Menu>
+                        </Dropdown>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
             </div>
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
       <Modal show={showModal} onHide={handleCancelEdit}>
         <Modal.Header closeButton>
           <Modal.Title>Edit Board</Modal.Title>
         </Modal.Header>
-        <Modal.Body>
+        <Modal.Body
+        style={{
+          width: '100%',
+          overflow: 'hidden',
+          padding:'20px 30px '
+        }}
+        >
           <Form.Group controlId="formBoardName">
             <Form.Label>Board Name</Form.Label>
             <Form.Control
@@ -356,7 +478,15 @@ function Workspace() {
             <Form.Label>Board Photo</Form.Label>
             <Form.Control
               type="file"
-              onChange={(e) => setEditedBoardPhoto(e.target.files[0])}
+              accept="image/*"
+              onChange={(e) => {
+                const file = e.target.files[0];
+                if (file && file.size > 5 * 1024 * 1024) {
+                  alert("File size should not exceed 5MB");
+                  return;
+                }
+                setEditedBoardPhoto(file);
+              }}
             />
           </Form.Group>
         </Modal.Body>
@@ -372,6 +502,12 @@ function Workspace() {
               const workspace = workSpaces.find((ws) =>
                 ws.boards_of_the_workspace.some((b) => b.id === editingBoardId)
               );
+
+              if (!workspace || !editedBoardName) {
+                alert("Please make sure to fill all required fields.");
+                return;
+              }
+
               handleSaveClick(workspace.id, editingBoardId);
             }}
           >
@@ -410,6 +546,26 @@ function Workspace() {
           </Button>
         </Modal.Footer>
       </Modal>
+
+      <button
+        style={{
+          position: "fixed",
+          bottom: "25px",
+          right: "25px",
+          backgroundColor: "#b6c2cf",
+          color: "#1c2b41",
+          borderRadius: "50%",
+          cursor: "pointer",
+          width: "50px",
+          height: "50px",
+          fontWeight: "bold",
+          border: "none",
+        }}
+        onClick={() => setOpenPopUp(!openPopUp)}
+      >
+        msg
+      </button>
+      {openPopUp && <PopupMsg workSpaces={workSpaces} allUsers={allUsers} />}
     </div>
   );
 }

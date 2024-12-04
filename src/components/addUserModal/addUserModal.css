@@ -1,0 +1,17 @@
+.adduserBtn.board-item{
+    background-color: transparent;
+    border: none;
+    text-align: start;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.modal-content {
+background: #22272b;
+
+}
+
+.modal-title {
+    color: white;
+}

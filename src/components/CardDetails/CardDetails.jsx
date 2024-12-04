@@ -34,6 +34,8 @@ import Cookies from "js-cookie";
 import api from "../../apiAuth/auth";
 import { Button, Dropdown, Spinner } from "react-bootstrap";
 import Comment from "../comment/Comment";
+import { MdOutlineEdit } from "react-icons/md";
+import { FaRegCreditCard } from "react-icons/fa6";
 
 const CalendarIcon = () => {
   return (
@@ -107,7 +109,7 @@ function CardDetails({
 
   const newComment = useRef(null);
 
-  // cahnges
+  // changes
   const handleDelete = async () => {
     try {
       const response = await api({
@@ -152,7 +154,7 @@ function CardDetails({
     }
   };
 
-  console.log(files);
+  // console.log(files);
   const handleCoverUpload = async (event) => {
     let uploadedfiles = event.target.files;
     if (!uploadedfiles) return;
@@ -413,6 +415,7 @@ function CardDetails({
               className="cover-image"
               style={{
                 background: cardDetails.color,
+                height:'116px',
               }}
             ></div>
           )}
@@ -428,7 +431,18 @@ function CardDetails({
               />
             </form>
           ) : (
-            <h2 onClick={() => seteditText(true)}>{cardDetails.text}</h2>
+            <h2 
+            style={{
+              fontSize:'20px',
+              display:'flex',
+              alignItems:'center',
+              gap:'5px',
+              
+            }}
+            onClick={() => seteditText(true)}>
+              <FaRegCreditCard/>
+              {cardDetails.text}
+              </h2>
           )}
           <div className="wrapper">
             <div className="left">
@@ -524,6 +538,8 @@ function CardDetails({
                   ) : cardDetails.description ? (
                     <>
                       <div
+                      className="desc-content"
+                      style={{width:'500px', overflow:'hidden' ,}}
                         onClick={() => openItem("desc")}
                         dangerouslySetInnerHTML={{
                           __html: cardDetails.description,

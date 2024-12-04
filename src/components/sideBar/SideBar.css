@@ -13,7 +13,7 @@
   height: 100vh;
   position: fixed;
   top: 59px;
-  background-color: #335164;
+  background-color: #161a1de6;
   z-index: 10000;
 }
 button.sideNav-link {
@@ -23,13 +23,17 @@ button.sideNav-link {
   right: 21px;
   height: 25px;
   width: 25px;
-  z-index: 100;
-  background-color: #335164 !important;
+  z-index: 10001;
+  background-color: rgba(22, 26, 29, 1) ;
   border-radius: 50%;
-  background-color: transparent;
+  border: none;
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+button.sideNav-link:hover{
+  background-color: #161a1de6 !important;
 }
 
 .fade.offcanvas-backdrop {
@@ -41,13 +45,10 @@ button.sideNav-link {
   color: white;
 }
 
-button.sideNav-link:hover {
-  background-color: #335164;
-}
-
-button.sideNav-link > img {
-  width: 20px;
+.board-item img {
+  width: 24px;
   height: 20px;
+
 }
 
 .offcanvas {
@@ -55,8 +56,8 @@ button.sideNav-link > img {
 }
 
 .offcanvas-start {
-  z-index: 1000;
-  background-color: #335164 !important;
+  z-index: 10001;
+  background-color: #161a1de6 !important;
 }
 
 .offcanvas-header {
@@ -71,14 +72,28 @@ button.sideNav-link > img {
 }
 
 .offcanvas-body {
-  padding: 15px 8px !important ;
+  /* padding: 15px 20px !important ; */
+  display: flex;
+  flex-direction: column;
 }
 
-.offcanvas-title > img,
-.offcanvas-body img {
+.board-item{
+  /* background-color: #ffffff4d; */
+  height: 32px;
+  width: 100%;
+}
+
+.board-item span {
+  font-size: 14px;
+  color: #9fadbc;
+
+}
+
+.offcanvas-title > img {
   width: 35px;
   height: 25px;
   border-radius: 3px;
+  
 }
 
 .offcanvas-body h2 {
@@ -92,23 +107,44 @@ button.sideNav-link > img {
 .offcanvas-body .board-item {
   display: flex;
   align-items: center;
-  gap: 15px;
-  color: white;
+  gap: 20px;
+  color:#9fadbc;
   margin: 8px;
   margin-right: 0;
   width: 97%;
   position: relative;
+  
 }
 .offcanvas-body .users-list {
   padding: 12px 4px;
-  background-color: #3e99d188;
+  background-color: #9fadbc;
   border-radius: 12px;
+
+}
+
+.offcanvas-body .users-list .board-item{
+  background-color: transparent;
+  /* border-bottom: 1px solid #fff; */
+    padding-bottom: 4px;
+    overflow: hidden;
+}
+
+.offcanvas-body .users-list .board-item:hover{
+  background-color: #fff;
+  padding:  5px;
+}
+
+.offcanvas-body .users-list .board-item span{
+  font-size: 12px;
+  color: black;
 }
 
 .offcanvas-body .board-item::after {
   content: "";
   position: absolute;
   top: 0;
+  
+
   width: 100%;
   height: 100%;
   background-color: transparent;
@@ -126,6 +162,6 @@ button.sideNav-link > img {
 }
 @media (max-width: 1080px) {
   button.sideNav-link {
-    top: 150px;
+    top: 77px;
   }
 }

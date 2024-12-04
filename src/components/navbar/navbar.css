@@ -1,29 +1,54 @@
 nav {
   border-bottom: 1px solid lightgray;
-  background-color: #335164;
+  background-color: #1d2125 !important;
   position: fixed !important;
   z-index: 1000;
   width: 100vw;
   top: 0;
-  opacity: 0.85;
 }
 
 nav input[type="search"] {
   padding: 5px 12px;
-  border-radius: 8px;
+  border-radius: 5px;
+  background: transparent;
+
+}
+
+nav input[type="search"]::placeholder {
+  color: #9fadbc;
 }
 
 .nav-item.dropdown > a {
-  color: white;
+  color: #9fadbc;
 }
 
 .create .dropdown-toggle {
-  background-color: #499497;
+  /* background-color: #499497; */
+  border: rgb(159, 173, 188,0.3) 1px solid;
   color: white;
   border-radius: 8px;
+  
 }
 .create .dropdown-toggle::after {
   border: none;
+}
+
+.create .dropdown-menu.show{
+  background-color: #1d2125;
+  margin-top: 6px;
+  border: #9fadbc 1px solid;
+  padding: 20px 10px;
+}
+
+.workspacesMenu .dropdown-menu{
+  background-color: #282e33 !important;
+}
+
+.workspacesMenu .dropdown-item {
+  color: #b6c2cf !important;
+}
+.workspacesMenu .dropdown-item:hover {
+  background-color: #a1bdd914 !important;
 }
 
 .create .dropdown-menu .container {
@@ -31,19 +56,20 @@ nav input[type="search"] {
   flex-direction: column;
   align-items: center;
   gap: 12px;
+
 }
 
 .create .dropdown-menu .container h2 {
   font-size: 18px;
-  color: rgb(131, 123, 123);
+  color: #9fadbc;
 }
 .create .dropdown-menu .container label {
   font-size: 14px;
   margin-bottom: 6px;
-  color: rgb(68, 66, 66);
-}
+  color: #9fadbc;}
 .create .dropdown-menu .container button {
   width: 100%;
+  background-color: rgb(23, 43, 77);
 }
 
 nav button {
@@ -65,13 +91,14 @@ nav .user-name {
   width: 40px;
   height: 40px;
   color: white;
-  background-color: #499497;
-  border-radius: 50%;
+  background-color: #172b4d;
+  border-radius: 50% !important;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 700;
+  border: none;
 }
 
 .no-caret::after {
@@ -82,6 +109,19 @@ nav .user-name {
   font-weight: bold;
   text-align: center;
   line-height: 1;
+}
+
+.log-GD{
+  background: #1d2125;
+}
+
+.log-GD .dropdown-item:hover{
+  background-color: #a1bdd914;
+  color: #b6c2cf;
+}
+
+.log-GD a{
+  color: #9fadbc;
 }
 
 @media (max-width: 800px) {
@@ -95,3 +135,4 @@ nav .user-name {
     flex-wrap: wrap !important;
   }
 }
+

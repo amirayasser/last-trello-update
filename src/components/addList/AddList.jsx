@@ -44,7 +44,13 @@ function addList({ boardId, setboard, setShow }) {
   };
   return (
     <>
-      <Dropdown className="addList ">
+      <Dropdown
+        className="addList "
+        style={{
+          backgroundColor: "#ffffff80",
+          borderRadius:'12px',
+        }}
+      >
         <Dropdown.Toggle className="addList " id="dropdown-basic">
           <img src="/plus.svg" alt="" />
           <button onClick={() => setShow(false)} type="text">

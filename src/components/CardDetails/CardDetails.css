@@ -14,6 +14,7 @@
   padding: 2%;
   color: white;
   padding: 0;
+  width: 768px;
 }
 .modal-body h2,
 .modal-body > form {
@@ -24,6 +25,8 @@
   display: flex;
   gap: 12px;
   padding: 26px 4%;
+  overflow: hidden;
+  max-width: 100%;
 }
 
 .modal-body > .wrapper .left {
@@ -167,10 +170,11 @@
 .modal-body .state-wrapper {
   display: flex;
   gap: 6px;
-  background-color: #323940;
-  padding: 8px;
+  background-color: #a1bdd914;
+  padding: 6px 12px;
   color: white;
   border-radius: 8px;
+    font-size: 14px;
 }
 .modal-body .state-wrapper .state {
   background-color: rgb(69, 187, 69);
@@ -200,6 +204,7 @@
   width: 25px;
   height: 25px;
   cursor: pointer;
+  background-color: transparent;
 }
 
 .modal-body .description {
@@ -353,7 +358,7 @@
 
 .modal-body .cover-image,
 .list .item .cover-image {
-  height: 260px;
+  height: 260px ;
 }
 .cover-image > div {
   height: 100%;
@@ -485,4 +490,10 @@
   .item.move .dropdown-item select {
     font-size: 14px !important;
   }
+}
+
+
+
+.desc-content img{
+  max-width: 500px;
 }

@@ -15,6 +15,10 @@ import { Link, useParams } from "react-router-dom";
 import api from "../../apiAuth/auth";
 import Spinner from "react-bootstrap/esm/Spinner";
 import { AuthContext } from "../context/Auth";
+import { IoIosArrowForward } from "react-icons/io";
+import AddUserModal from "../addUserModal/AddUserModal";
+import { BsPeople } from "react-icons/bs";
+
 
 function SideBar({ show, setShow }) {
   const handleClose = () => setShow(false);
@@ -26,8 +30,12 @@ function SideBar({ show, setShow }) {
   const [workSpace, setworkSpace] = useState(null);
   const [showUsers, setShowUsers] = useState(false); // State to control user list visibility
   const [users, setUsers] = useState([]);
+  const [userWS, setUserWS] = useState([]);
 
   const { workspaceId, boardId } = useParams();
+ 
+  const path = location.pathname;
+ const pathName = path.split("/")[1];
 
   const cookies = Cookies.get("token");
   useEffect(() => {
@@ -73,6 +81,28 @@ function SideBar({ show, setShow }) {
     }
   }, [boardId]);
 
+
+  const getAllWSofUser = async ()=>{
+    try {
+      const response = await api({
+        url: `workspaces/user/workspaces`,
+        headers: { Authorization: `Bearer ${cookies}` },
+      });
+console.log("Cookies:", cookies);
+console.log("Response:", response);
+      const userWs = response.data.data;
+      setUserWS(userWs);
+console.log("All WS of User", userWs);
+      return userWs;
+    } catch (err) {
+      console.log(err);
+    }
+  }
+
+  useEffect(()=>{
+    getAllWSofUser();
+  }, [])
+
   if (loading) {
     return (
       <div className="w-100 h-100 d-flex justify-content-center align-items-center position-fixed top-0 left-0">
@@ -85,30 +115,36 @@ function SideBar({ show, setShow }) {
 
   return (
     <>
-      <Button className="sideNav-link" variant="primary" onClick={handleShow}>
-        <img src="/rightArrow.svg" alt="" />
-      </Button>
+      <button
+        className="sideNav-link"
+        onClick={handleShow}
+        style={{
+          visibility: show ? "hidden" : "visible",
+        }}
+      >
+        <IoIosArrowForward style={{ color: "#b6c2cf" }} />
+      </button>
 
       <div className="side-bar"></div>
       <Offcanvas show={show} onHide={handleClose}>
-        <Offcanvas.Header closeButton>
-          {workSpace ? (
-            <Offcanvas.Title>{workSpace.name} Workspace</Offcanvas.Title>
-          ) : (
-            <img
-              src="/logo.gif"
-              style={{
-                width: "80px",
-                height: "30px",
-                objectFit: "contain",
-                borderRadius: "5px",
-                marginLeft: "15px",
-              }}
-              alt=""
-            />
-          )}
-        </Offcanvas.Header>
+        {
+          <Offcanvas.Header closeButton>
+            {workSpace ? (
+              <Offcanvas.Title>{workSpace.name}</Offcanvas.Title>
+            ) : (
+              <Offcanvas.Title> Workspaces</Offcanvas.Title>
+            )}
+          </Offcanvas.Header>
+        }
+
         <Offcanvas.Body>
+          {pathName === "" &&
+            userWS.map((ws) => (
+              <p key={ws.id} className="board-item"
+              >
+                {ws.name}
+              </p>
+            ))}
           {workspaceId && (
             <a
               href="#"
@@ -118,14 +154,13 @@ function SideBar({ show, setShow }) {
                 setShowUsers((prev) => !prev);
               }}
             >
-              <img src={group} alt="" />
-
+              <BsPeople />
               <span>{boardId ? "Board" : "Workspace"} Members</span>
             </a>
           )}
           {showUsers && (
             <div className="users-list">
-              {users.length > 0 ? (
+              {users?.length > 0 ? (
                 users.map((user) => (
                   <div key={user.user_id} className="board-item">
                     <span>
@@ -138,22 +173,40 @@ function SideBar({ show, setShow }) {
               )}
             </div>
           )}
-          {user?.super_admin ? (
+          {workSpace && user?.role === "admin" ? (
+            <Link
+              to={`/boards/get-boards/${workspaceId}`}
+              className="board-item"
+            >
+              <img src={table} alt="" />
+              <span>Boards</span>
+            </Link>
+          ) : null}
+          {/* {user?.role === "admin" ? (
             <Link to="/allMembers" className="board-item">
               <img src={table} alt="" />
               <span>All Members</span>
             </Link>
-          ) : null}
-          <a href="#" className="board-item">
+          ) : null} */}
+
+          {pathName === "board" && user?.role === "admin" && (
+            <Link to="/allMembers" className="board-item">
+              <img src={table} alt="" />
+              <span>invite</span>
+            </Link>
+          )}
+
+          {/* <a href="#" className="board-item">
             <img src={date} alt="" />
             <span>Calender</span>
-          </a>
-          {user?.super_admin ? (
+          </a> */}
+
+          {/* {user?.role === "admin" ? (
             <Link to="/register" className="board-item">
               <img src={addMember} alt="" />
               <span>Add Member</span>
             </Link>
-          ) : null}
+          ) : null} */}
           {workspaceId && boardId && (
             <Link to={`/archeivedCards/${boardId}`} className="board-item">
               <img src={removedUsers} alt="" />
@@ -179,6 +232,10 @@ function SideBar({ show, setShow }) {
                 <span>{board.name} </span>
               </Link>
             ))}
+
+          {/* admin can only add user */}
+
+          {user?.role === "admin" && <AddUserModal />}
         </Offcanvas.Body>
       </Offcanvas>
     </>

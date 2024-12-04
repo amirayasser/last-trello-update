@@ -12,10 +12,20 @@ import { AuthContext } from "../context/Auth";
 import "./navbar.css";
 import Dropdown from "react-bootstrap/Dropdown";
 import { useNavigate } from "react-router-dom";
+import ChangeBoardBg from '../changeBoardBg/ChangeBoardBg';
 
-function NavBar({ workSpaces, setShow, setworkSpaces, disableAdding }) {
+function NavBar({
+  workSpaces,
+  setShow,
+  setworkSpaces,
+  disableAdding,
+  boardBg,
+  currWSUsers,
+  allUsers,
+  setAllUsers,
+}) {
   const [error, setError] = useState(null);
-  const [users, setUsers] = useState([]);
+  // const [users, setUsers] = useState([]);
   const { user, dispatch } = useContext(AuthContext);
   const workspaceTitle = useRef(null);
   const boardTitle = useRef(null);
@@ -24,6 +34,15 @@ function NavBar({ workSpaces, setShow, setworkSpaces, disableAdding }) {
   const [shouldFetchAssignedUsers, setShouldFetchAssignedUsers] =
     useState(false);
 
+  const [showBGBoard, setShowBg] = useState(true);
+  const [visibility, setVisibility] = useState("workspace");
+  const [selectedUsersIds, setSelectedUsersIds] = useState([]);
+
+  const [loading, setLoading] = useState(true);
+
+  const [selectedOptions, setSelectedOptions] = useState([]);
+  const [image, setImage] = useState(null);
+
   const location = useLocation();
   const path = location.pathname;
   const pathName = path.split("/")[1];
@@ -31,40 +50,136 @@ function NavBar({ workSpaces, setShow, setworkSpaces, disableAdding }) {
   const cookies = Cookies.get("token");
   const { workspaceId, boardId } = useParams();
 
-  useEffect(() => {
-    const fetchUsers = async () => {
-      try {
-        const { data } = await api.get("/users/get-users", {
-          headers: { Authorization: `Bearer ${cookies}` },
-        });
-        setUsers(data.data);
-      } catch (err) {
-        console.log(err);
-        setError(err.response?.data?.message);
-      }
-    };
+  const handleChange = (event) => {
+    const options = Array.from(
+      event.target.selectedOptions,
+      (option) => option.value
+    );
+    setSelectedOptions(options);
+    console.log(options);
+  };
+  console.log("curr user :", user);
 
-    fetchUsers();
-  }, [cookies]);
-
-  const addBoard = async (e) => {
-    e.preventDefault();
+  const fetchUsers = async () => {
     try {
-      const { data } = await api({
-        url: "/boards/create",
-        method: "post",
+      setLoading(true);
+      console.log("Fetching users...");
+      const { data } = await api.get("/users/get-users", {
         headers: { Authorization: `Bearer ${cookies}` },
-        data: {
-          name: boardTitle.current.value,
-          workspace_id: workspaceId,
-        },
       });
-      navigate(`/board/${workspaceId}/${data.data.id}`);
+      console.log("Fetched users:", data);
+      setAllUsers(data.data); // Ensure 'data.data' matches your API structure
     } catch (err) {
-      console.log(err);
-      setError(err.response?.data?.message || "somting went wrong");
+      console.error("Error fetching users:", err);
+      setError(err.response?.data?.message || "Something went wrong");
+    } finally {
+      console.log("Fetch complete");
+      setLoading(false);
     }
   };
+
+  useEffect(() => {
+    if (cookies) {
+      fetchUsers();
+    }
+  }, [cookies]);
+
+
+const handleImageChange = (e) => {
+  const file = e.target.files[0];
+  if (file && file.type.startsWith("image/")) {
+    setImage(file); // حفظ الملف المختار مباشرة
+    console.log("Selected image file:", file);
+  } else {
+    alert("Please select a valid image file.");
+  }
+};
+// فيه مشكله فى رفع الصوره بتاعت البورد هنا ايرور 422
+const addBoard = async (e) => {
+  e.preventDefault();
+  setError(null); // تعيين error إلى null قبل محاولة إضافة الـ board
+
+  let imageUrl = null;
+  let boardData = {}; // تعريف كائن فارغ مبكرًا لتجنب undefined
+
+  try {
+    // رفع الصورة إذا كانت موجودة
+    if (image) {
+      console.log("Attempting to upload the image...");
+      const formData = new FormData();
+      formData.append("photo", image);
+
+      console.log("FormData contains:");
+      for (let pair of formData.entries()) {
+        console.log(`${pair[0]}:`, pair[1]);
+      }
+
+      try {
+        const photoResponse = await api({
+          url: `/boards/upload/${workspaceId}`,
+          method: "POST",
+          headers: { Authorization: `Bearer ${cookies}` },
+          data: formData,
+        });
+
+        if (photoResponse.data.success) {
+          imageUrl = photoResponse.data.data.photo; // مسار الصورة بعد رفعها
+          console.log("Photo uploaded successfully:", imageUrl);
+        } else {
+          console.error(
+            "Failed to upload image. Response:",
+            photoResponse.data
+          );
+          throw new Error("Image upload failed.");
+        }
+      } catch (uploadError) {
+        console.error("Error while uploading image:", uploadError);
+        throw new Error("Image upload failed.");
+      }
+    }
+
+    // إعداد البيانات قبل إرسالها
+    boardData = {
+      name: boardTitle.current.value || "Untitled Board",
+      workspace_id: workspaceId,
+      visibility: visibility,
+      user_ids: visibility === "private" ? selectedUsersIds : [],
+      photo: imageUrl, // حتى لو كانت null
+    };
+
+    console.log("Prepared boardData:", boardData);
+
+    // إضافة الـ board
+    const { data } = await api({
+      url: "/boards/create",
+      method: "POST",
+      headers: { Authorization: `Bearer ${cookies}` },
+      data: boardData,
+    });
+
+    console.log("Board created successfully:", data);
+    navigate(`/board/${workspaceId}/${data.data.id}`);
+    setError(null);
+  } catch (err) {
+    console.error("Error occurred:", err);
+
+    // طباعة البيانات حتى لو كانت غير مكتملة
+    console.log("Failed data:", {
+      imageUrl: imageUrl || "Image upload failed or not provided",
+      boardData: Object.keys(boardData).length
+        ? boardData
+        : "Board data not prepared yet",
+    });
+
+    // طباعة الخطأ الكامل
+    console.error("Full error response:", err.response);
+
+    setError(err.response?.data?.message || "Something went wrong");
+  }
+};
+
+
+
 
   const addWorkspace = async (e) => {
     e.preventDefault();
@@ -77,9 +192,13 @@ function NavBar({ workSpaces, setShow, setworkSpaces, disableAdding }) {
       });
       setworkSpaces((prev) => [...prev, data.result]);
       document.querySelector(".create .dropdown-menu").classList.remove("show");
+      setError(null);
     } catch (err) {
       console.log(err);
       setError(err.response?.data?.message);
+      setTimeout(() => {
+        setError(null);
+      }, 3000);
     }
   };
 
@@ -135,7 +254,7 @@ function NavBar({ workSpaces, setShow, setworkSpaces, disableAdding }) {
         );
         setAssignedUsers([
           ...assignedUsers,
-          users.find((user) => user.id === userId),
+          allUsers.find((user) => user.id === userId),
         ]);
         alert("User successfully assigned to the board!");
       }
@@ -174,8 +293,16 @@ function NavBar({ workSpaces, setShow, setworkSpaces, disableAdding }) {
     } catch (err) {
       console.error("Logout error:", err.message || "Unknown error");
       setError(err.response?.data?.message || "Failed to log out.");
+      setTimeout(() => {
+        setError(null);
+      }, 3000);
     }
   };
+
+  console.log("user name: ", user?.name);
+
+  console.log("users", allUsers);
+
   return (
     <Navbar expand="lg">
       <Container>
@@ -200,7 +327,11 @@ function NavBar({ workSpaces, setShow, setworkSpaces, disableAdding }) {
             navbarScroll
           >
             {pathName === "" ? (
-              <NavDropdown title="Workspaces" id="navbarScrollingDropdown">
+              <NavDropdown
+                title="Workspaces"
+                id="navbarScrollingDropdown"
+                className="workspacesMenu"
+              >
                 {workSpaces.map((workspace) => (
                   <NavDropdown.Item
                     key={workspace.id}
@@ -215,22 +346,27 @@ function NavBar({ workSpaces, setShow, setworkSpaces, disableAdding }) {
               ""
             )}
 
-            {pathName === "board" && (
+            {/* {pathName === "board" && (
               <NavDropdown
                 title="Invite Board Members"
                 id="navbarScrollingDropdown"
               >
-                {users.map((user) => (
-                  <NavDropdown.Item
-                    key={user.id}
-                    onClick={() => handleUserClick(user.id)}
-                  >
-                    {user.email}
-                  </NavDropdown.Item>
-                ))}
+                {allUsers &&
+                  allUsers.length > 0 &&
+                  allUsers.map((user) => (
+                    <NavDropdown.Item
+                      key={user.id}
+                      onClick={() => handleUserClick(user.id)}
+                    >
+                      {user.email}
+                    </NavDropdown.Item>
+                  ))}
               </NavDropdown>
-            )}
-            {pathName !== "board" &&
+            )} */}
+
+            {user?.role === "admin" &&
+            pathName === "" &&
+            pathName !== "board" &&
             pathName !== "workspace" &&
             !disableAdding ? (
               <NavDropdown
@@ -253,11 +389,27 @@ function NavBar({ workSpaces, setShow, setworkSpaces, disableAdding }) {
                   <Button type="submit" variant="primary">
                     Create Workspace
                   </Button>
-                  {error && <span className="err">{error}</span>}
+                  {error && (
+                    <span
+                      className="err"
+                      style={{
+                        backgroundColor: "#ffc5c9",
+                        color: "#212529",
+                        padding: "8px",
+                        fontWeight: "500",
+                        fontSize: "12px",
+                        borderRadius: "5px",
+                        marginBottom: "8px",
+                      }}
+                    >
+                      {error}
+                    </span>
+                  )}
                 </form>
               </NavDropdown>
             ) : (
-              !disableAdding && (
+              !disableAdding &&
+              pathName !== "" && (
                 <NavDropdown
                   title="Create Board"
                   id="navbarScrollingDropdown"
@@ -266,19 +418,85 @@ function NavBar({ workSpaces, setShow, setworkSpaces, disableAdding }) {
                 >
                   <form className="container" onSubmit={addBoard}>
                     <h2>Board</h2>
-                    <div className="input-wrapper">
-                      <label htmlFor="">Board title *</label>
-                      <input ref={boardTitle} type="text" required autoFocus />
+                    <div
+                      className="input-wrapper"
+                      style={{
+                        display: "flex",
+                        flexDirection: "column",
+                        justifyContent: "center",
+                        alignItems: "center",
+                        gap: "8px",
+                      }}
+                    >
+                      {/* <label htmlFor="">Board title</label> */}
+                      <input
+                        ref={boardTitle}
+                        type="text"
+                        required
+                        autoFocus
+                        placeholder="title"
+                      />
+                      <Form.Select
+                        aria-label="Default select example"
+                        value={visibility}
+                        onChange={(e) => setVisibility(e.target.value)}
+                      >
+                        <option value="public">public</option>
+                        <option value="private">private</option>
+                        <option value="workspace">workspace</option>
+                      </Form.Select>
+                      {visibility === "private" && (
+                        <select
+                          multiple
+                          onChange={(e) =>
+                            setSelectedUsersIds(
+                              Array.from(
+                                e.target.selectedOptions,
+                                (option) => option.value
+                              )
+                            )
+                          }
+                        >
+                          {currWSUsers &&
+                            currWSUsers?.length > 0 &&
+                            currWSUsers?.map((user) => (
+                              <option key={user.user_id} value={user.user_id}>
+                                {user.user_name}
+                              </option>
+                            ))}
+                        </select>
+                      )}
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={handleImageChange} // يتم رفع الصورة عند اختيارها
+                      />
                     </div>
                     <Button type="submit" variant="primary">
                       Create Board
                     </Button>
-                    {error && <span className="err">{error}</span>}
+                    {/* {error && (
+                      <span
+                        className="err"
+                        style={{
+                          backgroundColor: "#ffc5c9",
+                          color: "#212529",
+                          padding: "8px",
+                          fontWeight: "500",
+                          fontSize: "12px",
+                          borderRadius: "5px",
+                          marginBottom: "8px",
+                        }}
+                      >
+                        {error}
+                      </span>
+                    )} */}
                   </form>
                 </NavDropdown>
               )
             )}
           </Nav>
+
           <Form className="d-flex">
             <form
               type="search"
@@ -293,7 +511,7 @@ function NavBar({ workSpaces, setShow, setworkSpaces, disableAdding }) {
                 placeholder="Search"
                 aria-label="Search"
                 type="search"
-                class="me-2 form-control"
+                className="me-2 form-control"
                 onClick={(e) => {
                   e.target.focus();
                 }}
@@ -301,7 +519,7 @@ function NavBar({ workSpaces, setShow, setworkSpaces, disableAdding }) {
               ></input>
             </form>
             {user ? (
-              <Dropdown align="end">
+              <Dropdown align="end" style={{ borderRadius: "50%" }}>
                 <Dropdown.Toggle
                   className="user-name no-caret"
                   id="dropdown-basic"
@@ -311,8 +529,12 @@ function NavBar({ workSpaces, setShow, setworkSpaces, disableAdding }) {
                   {user.name.split(" ")[1]?.charAt(0)?.toUpperCase()}
                 </Dropdown.Toggle>
 
-                <Dropdown.Menu>
-                  <Dropdown.Item onClick={handleLogout}>Logout</Dropdown.Item>
+                <Dropdown.Menu className="log-GD">
+                  <Dropdown.Item onClick={handleLogout}>Log out</Dropdown.Item>
+                  <Dropdown.Item onClick={() => setShowBg(!showBGBoard)}>
+                    change board bg
+                  </Dropdown.Item>
+                  {showBGBoard && <ChangeBoardBg />}
                 </Dropdown.Menu>
               </Dropdown>
             ) : (

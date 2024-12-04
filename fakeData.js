@@ -5,7 +5,7 @@ export const lists = [
   },
   {
     title: "test2",
-    cards: ["card1", "card1", "card1", "card1", "card1", "card1"],
+    cards: ["card2", "card1", "card1", "card1", "card1", "card1"],
   },
   {
     title: "test3",

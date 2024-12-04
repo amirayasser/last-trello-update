@@ -1,0 +1,29 @@
+.image-selector {
+    width: 260px;
+    height: auto;
+    overflow: hidden;
+    display: flex;
+        flex-wrap: wrap;
+        /* gap: 6px; */
+        align-items: center;
+        justify-content: space-between;
+        padding: 16px 8px;
+}
+
+.image-option{
+    overflow: hidden;
+            border-radius: 18px;
+            padding:  4px ;
+          
+            width: 49%;
+            z-index: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+    width: 48%;
+        
+}
+.image-option img {
+    width: 100%;
+    object-fit: contain;
+}

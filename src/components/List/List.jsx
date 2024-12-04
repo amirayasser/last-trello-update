@@ -1,3 +1,5 @@
+import "./list.css";
+
 import Button from "react-bootstrap/Button";
 import CloseButton from "react-bootstrap/CloseButton";
 
@@ -8,11 +10,12 @@ import Cookies from "js-cookie";
 import api from "../../apiAuth/auth";
 
 import Dropdown from "react-bootstrap/Dropdown";
-import "./list.css";
 import Modal from "react-bootstrap/Modal";
 import Form from "react-bootstrap/Form";
 
 import { DragDropContext, Draggable, Droppable } from "react-beautiful-dnd";
+import { IoIosMore } from "react-icons/io";
+
 
 function List({ list, setboard, boardId, board, setShow }) {
   const [showCardList, setshowCardList] = useState(false);
@@ -161,14 +164,14 @@ function List({ list, setboard, boardId, board, setShow }) {
 
   return (
     <div className="list">
-      <div className="list-header d-flex align-items-center justify-content-between my-2">
+      <div className="list-header">
         <h3>{list.title}</h3>
         <Dropdown>
           <Dropdown.Toggle
             as="button"
             className="custom-dropdown-toggle p-0 no-caret"
           >
-            <span className="vertical-dots">⋮</span>
+            <IoIosMore style={{ color: "#b6c2cf" }} />
           </Dropdown.Toggle>
           <Dropdown.Menu className="bg-white border-0 shadow">
             <Dropdown.Item onClick={handleEditListClick}>
@@ -181,7 +184,7 @@ function List({ list, setboard, boardId, board, setShow }) {
         </Dropdown>
       </div>
 
-      <Droppable droppableId={list.id.toString()}>
+      <Droppable droppableId={list.id.toString()} type="card">
         {(provided) => (
           <div
             className="wrapper"
@@ -190,33 +193,55 @@ function List({ list, setboard, boardId, board, setShow }) {
           >
             {list.cards_of_the_list.map((card, i) => (
               <Draggable
-                draggableId={card.id.toString()}
-                index={i}
-                key={card.id}
+                draggableId={card.id.toString()} // التأكد من أن card.id فريد
+                index={i} // التأكد من أن الـ index يتم تحديده بشكل صحيح
+                key={card.id} // التأكد من أن المفتاح (key) فريد
               >
-                {(provided) => (
-                  <div
-                    className="item-container"
-                    {...provided.dragHandleProps}
-                    {...provided.draggableProps}
-                    ref={provided.innerRef}
-                    style={{ width: "98%", margin: "6px 0" }}
-                  >
-                    <Card
-                      index={i}
-                      card={card}
-                      listId={list.id}
-                      onCardDelete={handleCardDelete}
-                      board={board}
-                      setShow={setShow}
-                    />
-                  </div>
-                )}
+                {(provided, snapshot) => {
+                  // console.log(
+                  //   "Draggable styles:",
+                  //   provided.draggableProps.style
+                  // ); // Log styles during render
+
+                  return (
+                    <div
+                      {...provided.dragHandleProps} // خصائص السحب
+                      {...provided.draggableProps} // خصائص السحب والتفاعل
+                      ref={provided.innerRef}
+                      className="draggable"
+                      style={{
+                        width: "100%",
+                        borderRadius: "8px",
+                        backgroundColor: snapshot.isDragging
+                        ? "#888"
+                        : "#22272",
+                        boxShadow: snapshot.isDragging
+                        ? "0px 4px 10px rgba(0, 0, 0, 0.2)"
+                        : "none",
+                        ...provided.draggableProps.style,
+                        // transform: snapshot.isDragging
+                        //   ? provided.draggableProps.style.transform
+                        //   : "translate(0, 0)",
+                      }}
+                    >
+                      <Card
+                        index={i}
+                        card={card}
+                        listId={list.id}
+                        onCardDelete={handleCardDelete}
+                        board={board}
+                        setShow={setShow}
+                      />
+                    </div>
+                  );
+                }}
               </Draggable>
             ))}
+            {provided.placeholder}
           </div>
         )}
       </Droppable>
+
       <Dropdown className="addList addListCard">
         <Dropdown.Toggle className="addList addListCard" id="dropdown-basic">
           <img src="/plus.svg" alt="" />

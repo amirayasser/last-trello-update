@@ -1,17 +1,26 @@
+.boards{
+  width: auto;
+  overflow-x: scroll;
+}
+
 .boards > .wrapper {
-  padding: 1% 0 0 6%;
-  min-height: 100vh;
+  /* padding: 1% 0 0 6%; */
+  max-height: calc(100vh - 116px);
   background-size: cover;
   background-position: center;
-  padding-top: 85px;
+  padding-top: 40px;
+  background-blend-mode: darken;
+  overflow-y: hidden;
 }
 
 .boards > .wrapper .wrapper-lists {
   align-items: start;
   display: flex;
   gap: 18px;
-  min-height: 100vh;
+  max-height: calc(100vh - 156px);
   overflow-x: scroll;
+  overflow-x: visible;
+  overflow-y: hidden;
 }
 
 .boards .addList {
@@ -19,10 +28,15 @@
   display: flex;
   align-items: center;
   gap: 5px;
-  border-radius: 18px;
+  /* border-radius: 18px; */
   width: 250px;
   min-width: 250px;
-  background-color: #46484d8a;
+}
+
+.boards .addList button{
+  color: #101204 !important;
+  padding: 6px 12px 6px 8px;
+  border-radius: 8px;
 }
 
 .boards .addList.addListCard {
@@ -35,10 +49,10 @@
 }
 
 .boards .addList:hover {
-  background-color: #292a2b;
+  /* background-color: #292a2b; */
 }
 .boards .addList.addListCard:hover {
-  background-color: #898e9296;
+  /* background-color: #a6c5e229; */
 }
 
 .boards .addList img {
@@ -51,11 +65,16 @@
   flex: 1;
   border: none;
   background: transparent;
-  color: white;
 }
 .boards .addList.addListCard > button {
-  color: #515255;
+  color: #515255 !important;
 }
+
+.boards .addList.addListCard > button:hover{
+  background: #a6c5e229;
+    color: #b6c2cf !important;
+}
+
 
 .boards .addListForm {
   position: absolute;
@@ -90,35 +109,18 @@
   gap: 8px;
 }
 
-.boards .list {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  border-radius: 18px;
-  padding: 8px 0;
-  padding-left: 12px;
-  width: 250px;
-  min-width: 250px;
-  background-color: #fff;
-  margin-bottom: 45px;
-}
 
-.boards .list .list-header {
-  padding: 8px 12px;
-}
-.boards .list h3 {
-  font-size: 16px;
-  margin-left: 8px;
-  font-weight: 600;
-  line-height: 20px;
-}
+
+
 
 .boards .list > .wrapper {
   display: flex;
   flex-direction: column;
   gap: 8px;
-  max-height: calc(100vh - 230px);
-  overflow-y: scroll;
+  max-height: calc(100% - 140px);
+  /* min-height: 100px; */
+  overflow-y: auto;
+  padding-bottom: 10px;
 }
 
 .list .wrapper .item .cover-image {
