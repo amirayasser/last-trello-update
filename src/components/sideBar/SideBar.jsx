@@ -11,7 +11,7 @@ import removedUsers from "../../../public/removedUsers.svg";
 import addMember from "../../../public/addUSer.svg";
 
 import "./SideBar.css";
-import { Link, useParams } from "react-router-dom";
+import { Link, NavLink, useParams } from "react-router-dom";
 import api from "../../apiAuth/auth";
 import Spinner from "react-bootstrap/esm/Spinner";
 import { AuthContext } from "../context/Auth";
@@ -130,7 +130,26 @@ console.log("All WS of User", userWs);
         {
           <Offcanvas.Header closeButton>
             {workSpace ? (
-              <Offcanvas.Title>{workSpace.name}</Offcanvas.Title>
+              <Offcanvas.Title>
+                <span
+                  style={{
+                    backgroundColor: "#e774bb",
+                    width: "24px",
+                    height: "24px",
+                    borderRadius: "8px",
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    fontSize: "14px",
+                    color: "#1d2125",
+                    fontWeight: "bold",
+                    marginLeft:"10px",
+                  }}
+                >
+                  {workSpace.name.charAt(0).toUpperCase()}
+                </span>
+                {workSpace.name}
+              </Offcanvas.Title>
             ) : (
               <Offcanvas.Title> Workspaces</Offcanvas.Title>
             )}
@@ -140,10 +159,29 @@ console.log("All WS of User", userWs);
         <Offcanvas.Body>
           {pathName === "" &&
             userWS.map((ws) => (
-              <p key={ws.id} className="board-item"
+              <NavLink
+                to={`/workspace/${ws.id}`}
+                key={ws.id}
+                className="board-item"
               >
+                <span
+                  style={{
+                    backgroundColor: "#e774bb",
+                    width: "24px",
+                    height: "24px",
+                    borderRadius: "8px",
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    fontSize: "14px",
+                    color: "#1d2125",
+                    fontWeight: "bold",
+                  }}
+                >
+                  {ws.name.charAt(0).toUpperCase()}
+                </span>
                 {ws.name}
-              </p>
+              </NavLink>
             ))}
           {workspaceId && (
             <a
@@ -173,7 +211,7 @@ console.log("All WS of User", userWs);
               )}
             </div>
           )}
-          {workSpace && user?.role === "admin" ? (
+          {/* {workSpace && user?.role === "admin" ? (
             <Link
               to={`/boards/get-boards/${workspaceId}`}
               className="board-item"
@@ -181,7 +219,7 @@ console.log("All WS of User", userWs);
               <img src={table} alt="" />
               <span>Boards</span>
             </Link>
-          ) : null}
+          ) : null} */}
           {/* {user?.role === "admin" ? (
             <Link to="/allMembers" className="board-item">
               <img src={table} alt="" />

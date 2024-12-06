@@ -12,7 +12,7 @@ import Cookies from "js-cookie";
 
 import List from "../../components/List/List";
 import SideBar from "../../components/sideBar/SideBar";
-import { useNavigate, useParams } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import Spinner from "react-bootstrap/esm/Spinner";
 import api from "../../apiAuth/auth";
 
@@ -34,12 +34,18 @@ function Board() {
   const { selectedImage } = useContext(ImageContext) || {}; // Safely handle undefined
   console.log("selectedImage", selectedImage);
 
-  const { boardId ,workspaceId} = useParams();
+  const { boardId, workspaceId } = useParams();
 
   const cookies = Cookies.get("token");
-  const {user} = useContext(AuthContext)
+  const { user } = useContext(AuthContext);
 
-  const navigate = useNavigate()
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const path = location.pathname;
+  const pathName = path.split("/")[1];
+
+
 
   useEffect(() => {
     const getBoard = async () => {
@@ -49,13 +55,18 @@ function Board() {
           headers: { Authorization: `Bearer ${cookies}` },
         });
         setboard(data.data);
+      
         setLoading(false);
       } catch (err) {
         setLoading(false);
         console.log(err);
       }
     };
-    getBoard();
+
+    if (boardId) {
+      getBoard();
+      
+    }
   }, [boardId]);
 
   useEffect(() => {
@@ -101,10 +112,10 @@ function Board() {
           data: {
             board_id: parseInt(boardId),
             lists: updatedLists.map((list) => list.id),
-            position: destination.index ,
+            position: destination.index,
           },
         });
-        console.log('succeed')
+        console.log("succeed");
       } catch (err) {
         console.log(
           "Error updating list order:",
@@ -114,7 +125,7 @@ function Board() {
         console.log("Payload:", {
           board_id: parseInt(boardId),
           lists: updatedLists.map((list) => list.id),
-          position: destination.index ,
+          position: destination.index,
         });
       }
     } else if (type === "card") {
@@ -170,7 +181,7 @@ function Board() {
 
         setboard((prev) => ({ ...prev, lists_of_the_board: updatedLists })); // تعديل: استخدام نسخة "prev" لضمان تجنب مشاكل السباق
       }
-      console.log('moved card',movedCard)
+      console.log("moved card", movedCard);
       // إرسال التحديثات إلى السيرفر في الخلفية
       try {
         await api({
@@ -178,29 +189,27 @@ function Board() {
           method: "POST",
           headers: { Authorization: `Bearer ${cookies}` },
           data: {
-           
             id: parseInt(movedCard.id),
             the_board_name: board.name,
             the_list_name: destinationList.name,
             position: destination.index,
             text: movedCard.text,
             completed: movedCard.completed,
-            the_list_id:destinationList.id,
+            the_list_id: destinationList.id,
           },
         });
-     
-         console.log(
-           `Destination list: ${destinationList.id} (index ${destination.index})`
-         );
+
+        console.log(
+          `Destination list: ${destinationList.id} (index ${destination.index})`
+        );
       } catch (err) {
-        console.log("Error updating card order:",err.response?.data || err.message);
-       
+        console.log(
+          "Error updating card order:",
+          err.response?.data || err.message
+        );
       }
     }
   };
-
-
-  
 
   if (loading) {
     return (
@@ -212,8 +221,7 @@ function Board() {
     );
   }
 
-
-  console.log(board)
+  console.log(board);
   return (
     <div
       className="boards"
@@ -226,7 +234,11 @@ function Board() {
         backgroundPosition: "50% 50%",
       }}
     >
-      <Navbar setShow={setShow} boardBg={selectedImage} />
+      <Navbar
+        setShow={setShow}
+        boardBg={selectedImage}
+        board=  {board}
+      />
       <Notifications userid={user.id} workspaceId={workspaceId} />
 
       <SideBar show={show} setShow={setShow} />
@@ -255,7 +267,6 @@ function Board() {
                       draggableId={list.id.toString()}
                       index={index}
                       key={list.id}
-                     
                     >
                       {(provided) => (
                         <div
@@ -263,7 +274,6 @@ function Board() {
                           {...provided.draggableProps}
                           ref={provided.innerRef}
                           className="draggable"
-                       
                         >
                           <List
                             list={list}

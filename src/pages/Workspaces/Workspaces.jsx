@@ -45,7 +45,7 @@ function Workspace() {
         headers: { Authorization: `Bearer ${cookies}` },
       });
       setworkSpaces(data.result);
-      console.log('workspaces : ' + JSON.stringify(data.result));
+      console.log('workspaces : ' + data.result);
     } catch (err) {
       console.log(err);
     } finally {

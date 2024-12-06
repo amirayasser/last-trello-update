@@ -6,7 +6,7 @@ import Form from "react-bootstrap/Form";
 import Cookies from "js-cookie";
 
 import "./Workspace.css";
-import { Link, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import NavBar from "../../components/navbar/Navbar";
 import SideBar from "../../components/sideBar/SideBar";
 import api from "../../apiAuth/auth";
@@ -238,18 +238,22 @@ function MyVerticallyCenteredModal(props) {
 }
 
 function Workspace() {
-    const { user } = useContext(AuthContext);
+  const { user } = useContext(AuthContext);
 
   const [show, setShow] = useState(true);
   const [modalShow, setModalShow] = useState(false);
   const [loading, setLoading] = useState(true);
-   const [workSpace, setWorkSpace] = useState({});
-   const [currWsUsers, setCurrWsUsers] = useState([]);
+  const [workSpace, setWorkSpace] = useState({});
+  const [currWsUsers, setCurrWsUsers] = useState([]);
+const [enteredBoard, setEnteredBoard] = useState();
+  const [hasAccess, setHasAccess] = useState(true);
+
+  const navigate = useNavigate()
 
   const { workspaceId } = useParams();
 
   const cookies = Cookies.get("token");
- 
+
   const fetchWorkspaceUsers = async () => {
     try {
       const response = await api.get(
@@ -264,21 +268,21 @@ function Workspace() {
     }
   };
 
-   const getWorkSpace =async () => {
-     try {
-       const { data } = await api({
-         url: `workspaces/get-workspace/${workspaceId}`,
-         headers: { Authorization: `Bearer ${cookies}` },
-       });
-       setWorkSpace(data.result);
-       setCurrWsUsers(data.result.users);
-       setLoading(false);
-       console.log('ws ',data.result);
-     } catch (err) {
-       setLoading(false);
-       console.error(err);
-     }
-   }
+  const getWorkSpace = async () => {
+    try {
+      const { data } = await api({
+        url: `workspaces/get-workspace/${workspaceId}`,
+        headers: { Authorization: `Bearer ${cookies}` },
+      });
+      setWorkSpace(data.result);
+      setCurrWsUsers(data.result.users);
+      setLoading(false);
+      console.log("ws ", data.result);
+    } catch (err) {
+      setLoading(false);
+      console.error(err);
+    }
+  };
 
   useEffect(() => {
     getWorkSpace();
@@ -294,6 +298,46 @@ function Workspace() {
 
 
 
+   
+
+
+ const checkUserAccess = async (boardId) => {
+   try {
+     const { data } = await api({
+       url: `boards/get-board/${boardId}`,
+       headers: { Authorization: `Bearer ${cookies}` },
+     });
+
+     console.log(data.data); // عرض البيانات للحصول على تفاصيل البورد
+
+     // تحقق مما إذا كان المستخدم من الأعضاء
+     const isMember = data.data.users.some(
+       (member) => member.user_id === user.id
+     );
+
+     if (!isMember) {
+       alert("You are not a member of this board!");
+
+       setHasAccess(false); // إذا لم يكن عضوًا، لا يسمح له بالدخول
+       return false;
+     }
+
+     console.log("You are a member of this board");
+     setHasAccess(true); // إذا كان عضوًا، يسمح له بالدخول
+     return true;
+   } catch (e) {
+     console.error("Error getting board information", e);
+     return false; // في حال حدوث خطأ، يُمنع الدخول
+   }
+ };
+
+ const handleBoardClick = async (boardId) => {
+   const hasAccess = await checkUserAccess(boardId); // انتظر التحقق من الصلاحيات
+   if (hasAccess) {
+     navigate(`/board/${workspaceId}/${boardId}`); // إذا كان عضوًا، يتم التوجيه
+   }
+ };
+
   if (loading) {
     return (
       <div className="w-100 h-100 d-flex justify-content-center align-items-center position-fixed top-0 left-0">
@@ -305,7 +349,7 @@ function Workspace() {
   }
   console.log(show);
 
-  console.log(workSpace)
+  console.log(workSpace);
 
   return (
     <>
@@ -319,7 +363,37 @@ function Workspace() {
         <div className="workspace views-wrapper">
           <div className="header">
             <div className="left">
-              <h2>{workSpace.name} Workspace</h2>
+              <h2
+                style={{
+                  display: "flex",
+                  justifyContent: "start",
+                  alignItems: "center",
+                  gap: "15px",
+                  fontWeight: "bold",
+                  fontSize: "25px",
+                  lineHeight: "20px",
+                  color: "#b6c2cf",
+                  textTransform: "capitalize",
+                }}
+              >
+                <span
+                  style={{
+                    backgroundColor: "#e774bb",
+                    width: "40px",
+                    height: "40px",
+                    borderRadius: "8px",
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    fontSize: "30px",
+                    color: "#1d2125",
+                    fontWeight: "bold",
+                  }}
+                >
+                  {workSpace.name?.charAt(0).toUpperCase()}
+                </span>
+                {workSpace?.name}
+              </h2>
             </div>
 
             {user.role == "admin" && (
@@ -362,45 +436,20 @@ function Workspace() {
           <div className="body ">
             <h2>Boards</h2>
 
-            {/* <div className="filters">
-              <div className="left">
-                <div className="item">
-                  <label htmlFor="">Sort by</label>
-                  <Form.Select aria-label="Default select example">
-                    <option> select sort</option>
-                    <option value="1">One</option>
-                    <option value="2">Two</option>
-                    <option value="3">Three</option>
-                  </Form.Select>
-                </div>
-                <div className="item">
-                  <label htmlFor="">Filter by</label>
-                  <Form.Select aria-label="Default select example">
-                    <option> select filter </option>
-                    <option value="1">One</option>
-                    <option value="2">Two</option>
-                    <option value="3">Three</option>
-                  </Form.Select>
-                </div>
-              </div>
-              <div className="right">
-                <label htmlFor="">Search</label>
-
-                <div className="item">
-                  <Form.Control size="md" type="text" placeholder="Search" />
-                </div>
-              </div>
-            </div> */}
             <div className="views">
               <div className="workspace-item">
                 <div className="wrapper">
                   {workSpace.boards_of_the_workspace &&
                     workSpace.boards_of_the_workspace.length > 0 &&
                     workSpace.boards_of_the_workspace.map((board) => (
-                      <Link
-                        key={board.board_id}
+                      <div
+                        key={board.id}
                         className="board-link"
-                        to={`/board/${workspaceId}/${board.id}`}
+                        // to={`/board/${workspaceId}/${board.id}`}
+                        onClick={() => {
+                          handleBoardClick(board.id);
+                          console.log(board.id);
+                        }}
                       >
                         <div className="card">
                           <img
@@ -413,7 +462,7 @@ function Workspace() {
                           />
                           <p style={{ padding: "8px" }}>{board.name}</p>
                         </div>
-                      </Link>
+                      </div>
                     ))}
                 </div>
               </div>

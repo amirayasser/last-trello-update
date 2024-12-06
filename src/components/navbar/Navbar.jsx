@@ -13,6 +13,13 @@ import "./navbar.css";
 import Dropdown from "react-bootstrap/Dropdown";
 import { useNavigate } from "react-router-dom";
 import ChangeBoardBg from '../changeBoardBg/ChangeBoardBg';
+import { DropdownButton } from "react-bootstrap";
+
+import pic1 from '../../assets/pexels-anastasia-shuraeva-7278606.jpg';
+import pic2 from '../../assets/pexels-fauxels-3184160.jpg';
+import pic3 from '../../assets/pexels-goumbik-296115.jpg';
+import pic4 from '../../assets/pexels-ivan-samkov-7213439.jpg';
+
 
 function NavBar({
   workSpaces,
@@ -23,6 +30,7 @@ function NavBar({
   currWSUsers,
   allUsers,
   setAllUsers,
+  board
 }) {
   const [error, setError] = useState(null);
   // const [users, setUsers] = useState([]);
@@ -30,7 +38,6 @@ function NavBar({
   const workspaceTitle = useRef(null);
   const boardTitle = useRef(null);
   const [assignedUsers, setAssignedUsers] = useState([]);
-  const navigate = useNavigate();
   const [shouldFetchAssignedUsers, setShouldFetchAssignedUsers] =
     useState(false);
 
@@ -43,12 +50,68 @@ function NavBar({
   const [selectedOptions, setSelectedOptions] = useState([]);
   const [image, setImage] = useState(null);
 
+  const [recentViewed, setRecentViewed] = useState([]);
+
+  const navigate = useNavigate();
+
   const location = useLocation();
+
   const path = location.pathname;
   const pathName = path.split("/")[1];
-
   const cookies = Cookies.get("token");
   const { workspaceId, boardId } = useParams();
+
+ useEffect(() => {
+   if (path === `/board/${workspaceId}/${boardId}`) {
+     // قراءة البيانات من localStorage
+     const storedRecentViewed =
+       JSON.parse(localStorage.getItem("recentViewed")) || [];
+
+     // تحديث recentViewed بإضافة البورد الحالي
+     setRecentViewed((prevRecentViewed) => {
+       // إنشاء كائن البورد الجديد
+       const currentBoard = {
+         id: board.id,
+         name: board.name,
+         wsId: workspaceId,
+       };
+
+       // التحقق من عدم وجود البورد مسبقًا في القائمة
+       const boardExists = storedRecentViewed.some(
+         (storedBoard) =>
+           storedBoard.id === currentBoard.id &&
+           storedBoard.wsId === currentBoard.wsId
+       );
+
+       if (!boardExists) {
+         // دمج البورد الجديد مع القيم القديمة والاحتفاظ بآخر 3 بوردات
+         const updatedRecentViewed = [
+           currentBoard,
+           ...storedRecentViewed,
+         ].slice(0, 3);
+
+         // تحديث localStorage
+         localStorage.setItem(
+           "recentViewed",
+           JSON.stringify(updatedRecentViewed)
+         );
+
+         return updatedRecentViewed;
+       }
+
+       // إذا كان البورد موجودًا بالفعل، أرجع القيم الحالية
+       return storedRecentViewed;
+     });
+   } else if (pathName !== "board") {
+     // قراءة recentViewed من localStorage إذا لم تكن في صفحة بورد
+     const storedRecentViewed =
+       JSON.parse(localStorage.getItem("recentViewed")) || [];
+     setRecentViewed(storedRecentViewed);
+   }
+ }, [boardId]);
+
+
+
 
   const handleChange = (event) => {
     const options = Array.from(
@@ -84,102 +147,72 @@ function NavBar({
     }
   }, [cookies]);
 
+ 
 
-const handleImageChange = (e) => {
-  const file = e.target.files[0];
-  if (file && file.type.startsWith("image/")) {
-    setImage(file); // حفظ الملف المختار مباشرة
-    console.log("Selected image file:", file);
-  } else {
-    alert("Please select a valid image file.");
-  }
-};
-// فيه مشكله فى رفع الصوره بتاعت البورد هنا ايرور 422
-const addBoard = async (e) => {
-  e.preventDefault();
-  setError(null); // تعيين error إلى null قبل محاولة إضافة الـ board
 
-  let imageUrl = null;
-  let boardData = {}; // تعريف كائن فارغ مبكرًا لتجنب undefined
 
-  try {
-    // رفع الصورة إذا كانت موجودة
-    if (image) {
-      console.log("Attempting to upload the image...");
-      const formData = new FormData();
-      formData.append("photo", image);
+ const addBoard = async (e) => {
+   e.preventDefault();
+   setError(null); // إعادة تعيين الخطأ
 
-      console.log("FormData contains:");
-      for (let pair of formData.entries()) {
-        console.log(`${pair[0]}:`, pair[1]);
-      }
+   let imageUrl = null; // رابط الصورة
+   let boardData = {}; // إعداد كائن البيانات
 
-      try {
-        const photoResponse = await api({
-          url: `/boards/upload/${workspaceId}`,
-          method: "POST",
-          headers: { Authorization: `Bearer ${cookies}` },
-          data: formData,
-        });
+   try {
+     // استخدم الصورة المختارة مباشرة إذا كانت موجودة
+     if (image) {
+       imageUrl =image; // رفع الصورة والحصول على الرابط
+       console.log("Image URL:", imageUrl);
+     }
 
-        if (photoResponse.data.success) {
-          imageUrl = photoResponse.data.data.photo; // مسار الصورة بعد رفعها
-          console.log("Photo uploaded successfully:", imageUrl);
-        } else {
-          console.error(
-            "Failed to upload image. Response:",
-            photoResponse.data
-          );
-          throw new Error("Image upload failed.");
-        }
-      } catch (uploadError) {
-        console.error("Error while uploading image:", uploadError);
-        throw new Error("Image upload failed.");
-      }
-    }
-
-    // إعداد البيانات قبل إرسالها
+     // إعداد البيانات المرسلة
     boardData = {
-      name: boardTitle.current.value || "Untitled Board",
+      name: boardTitle.current.value ,
       workspace_id: workspaceId,
       visibility: visibility,
       user_ids: visibility === "private" ? selectedUsersIds : [],
-      photo: imageUrl, // حتى لو كانت null
+      photo: imageUrl, 
     };
 
-    console.log("Prepared boardData:", boardData);
+     console.log("Prepared boardData:", boardData);
 
-    // إضافة الـ board
-    const { data } = await api({
-      url: "/boards/create",
-      method: "POST",
-      headers: { Authorization: `Bearer ${cookies}` },
-      data: boardData,
-    });
+     // إرسال الطلب لإنشاء الـ Board
+     const { data } = await api({
+       url: "/boards/create",
+       method: "POST",
+       headers: { Authorization: `Bearer ${cookies}` },
+       data: boardData,
+     });
 
-    console.log("Board created successfully:", data);
-    navigate(`/board/${workspaceId}/${data.data.id}`);
-    setError(null);
-  } catch (err) {
-    console.error("Error occurred:", err);
+     console.log("Board created successfully:", data);
+     navigate(`/board/${workspaceId}/${data.data.id}`);
+     setError(null); // إعادة تعيين الخطأ إذا تمت العملية بنجاح
+   } catch (err) {
+     console.error("Error occurred:", err);
 
-    // طباعة البيانات حتى لو كانت غير مكتملة
-    console.log("Failed data:", {
-      imageUrl: imageUrl || "Image upload failed or not provided",
-      boardData: Object.keys(boardData).length
-        ? boardData
-        : "Board data not prepared yet",
-    });
+     // طباعة معلومات الخطأ
+     console.log("Failed data:", {
+       imageUrl: imageUrl || "Image not provided",
+       boardData: Object.keys(boardData).length ? boardData : "Data not set",
+     });
 
-    // طباعة الخطأ الكامل
-    console.error("Full error response:", err.response);
-
-    setError(err.response?.data?.message || "Something went wrong");
-  }
-};
-
-
-
+    if (err.response) {
+      // إذا كانت هناك استجابة من الخادم
+      console.error("Error from server:", err.response.data);
+      setError(
+        err.response.data.message ||
+          "An error occurred while creating the board."
+      );
+    } else if (err.request) {
+      // إذا لم يتم تلقي استجابة
+      setError(
+        "No response from server. Please check your network connection."
+      );
+    } else {
+      setError("An unexpected error occurred.");
+    }
+   }
+ };
 
   const addWorkspace = async (e) => {
     e.preventDefault();
@@ -337,7 +370,30 @@ const addBoard = async (e) => {
                     key={workspace.id}
                     as={Link}
                     to={`/workspace/${workspace.id}`}
+                    style={{
+                      display: "flex",
+                      justifyContent: "start",
+                      alignItems: "center",
+                      gap: "10px",
+                      marginBottom: "10px",
+                    }}
                   >
+                    <span
+                      style={{
+                        backgroundColor: "#e774bb",
+                        width: "24px",
+                        height: "24px",
+                        borderRadius: "8px",
+                        display: "flex",
+                        justifyContent: "center",
+                        alignItems: "center",
+                        fontSize: "14px",
+                        color: "#1d2125",
+                        fontWeight: "bold",
+                      }}
+                    >
+                      {workspace.name.charAt(0).toUpperCase()}
+                    </span>
                     {workspace.name}
                   </NavDropdown.Item>
                 ))}
@@ -466,11 +522,44 @@ const addBoard = async (e) => {
                             ))}
                         </select>
                       )}
-                      <input
+                      {/* <input
                         type="file"
                         accept="image/*"
                         onChange={handleImageChange} // يتم رفع الصورة عند اختيارها
-                      />
+                      /> */}
+
+                      <div>
+                        <h4>Choose a Picture</h4>
+                        <div
+                          style={{
+                            display: "flex",
+                            gap: "8px",
+                            justifyContent: "center",
+                            alignItems: "center",
+                          }}
+                        >
+                          {[pic1, pic2, pic3, pic4].map((pic, index) => (
+                            <img
+                              key={index}
+                              src={pic}
+                              alt={`pic${index + 1}`}
+                              style={{
+                                width: "40px",
+                                height: "40px",
+                                objectFit: "cover",
+                                borderRadius: "5px",
+                                margin: "5px",
+                                cursor: "pointer",
+                                border:
+                                  image === pic
+                                    ? "2px solid blue"
+                                    : "2px solid transparent",
+                              }}
+                              onClick={() => setImage(pic)}
+                            />
+                          ))}
+                        </div>
+                      </div>
                     </div>
                     <Button type="submit" variant="primary">
                       Create Board
@@ -495,6 +584,22 @@ const addBoard = async (e) => {
                 </NavDropdown>
               )
             )}
+
+            <DropdownButton
+              id="dropdown-basic-button"
+              title="Recent"
+              style={{
+                backgroundColor: "transparent",
+              }}
+            >
+              {recentViewed?.length > 0 ? (
+                recentViewed.map((recent, index) => (
+                  <li key={index}>{recent.name}</li>
+                ))
+              ) : (
+                <li>No Recent Boards</li>
+              )}
+            </DropdownButton>
           </Nav>
 
           <Form className="d-flex">

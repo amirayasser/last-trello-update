@@ -6,6 +6,7 @@
 .boards > .wrapper {
   /* padding: 1% 0 0 6%; */
   max-height: calc(100vh - 116px);
+  min-height: calc(100vh - 116px);
   background-size: cover;
   background-position: center;
   padding-top: 40px;
